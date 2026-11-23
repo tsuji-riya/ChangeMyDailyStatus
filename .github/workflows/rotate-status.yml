@@ -1,0 +1,21 @@
+name: Rotate GitHub status
+on:
+  schedule:
+    - cron: '0 15 * * *' # 00:00 JST
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency: rotate-status
+jobs:
+  rotate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./rotate.sh
+        env:
+          GH_TOKEN: ${{ secrets.STATUS_TOKEN }}
+      - run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -am "Next status index: $(cat next_index)"
+          git push
